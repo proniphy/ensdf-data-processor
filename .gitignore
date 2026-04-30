@@ -219,3 +219,5 @@ obj/
 *.suo
 *.sln.docstates
 .vscode/
+
+data/

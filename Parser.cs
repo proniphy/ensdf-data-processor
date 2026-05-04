@@ -8,14 +8,23 @@ namespace ENSDF_Parser
 {
     internal class Parser
     {
-        public static List<Record> Parse(List<string> lines)
+        public static List<DataSet> Parse(List<string> lines)
         {
+            List<DataSet> sets = new List<DataSet>();
             List<Record> records = new List<Record>();
             foreach (var l in lines)
             {
-                records.Add(RecognizePattern(ParseId(l.Substring(0, 5)), ParseRecType(l.Substring(5, 4)), l));
+                if (l == "" || l.Replace(" ", "") == "")
+                {
+                    if (records.Count != 0)
+                    {
+                        sets.Add(new DataSet(records[0].Id, records));
+                        records = new List<Record>();
+                    }
+                }
+                else records.Add(RecognizePattern(ParseId(l.Substring(0, 5)), ParseRecType(l.Substring(5, 4)), l));
             }
-            return records;
+            return sets;
         }
 
         static Identifier ParseId(string nucid)
@@ -51,12 +60,12 @@ namespace ENSDF_Parser
             // col 9 = blank
             if (rtype.C1 != ' ' && rtype.C1 != '1' && rtype.C2 == ' ' && rtype.C4 == ' ' && (rtype.C3 == 'L' || rtype.C3 == 'B' || rtype.C3 == 'E' || rtype.C3 == 'G' || rtype.C3 == 'H'))
             {
-                return new ContinuationRecord(id, rtype, line);
+                return new CommentRecord(id, rtype, line);
             }
 
             // Identification record:
             // cols 6-9 are blank
-            if (rtype.C1 == ' ' && rtype.C2 == ' ' && rtype.C3 == ' ' && rtype.C4 == ' ')
+            if ((rtype.C1 == ' ' && rtype.C2 == ' ' && rtype.C3 == ' ' && rtype.C4 == ' ') || (char.IsDigit(rtype.C1) && rtype.C2 == ' ' && rtype.C3 == ' ' && rtype.C4 == ' '))
             {
                 return new IdentificationRecord(id, rtype, line);
             }

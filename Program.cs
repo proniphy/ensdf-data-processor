@@ -1,30 +1,69 @@
-﻿namespace ENSDF_Parser {
+﻿namespace ENSDF_Parser
+{
     internal class Program
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            List<string> lines = File.ReadAllLines("data\\Pd106_beta_v2.ens").ToList();
 
-            List<string> lines = new List<string>
+            bool isEnergyComment = false;
+            Dictionary<Level, Dictionary<GammaRecord, List<Value>>> values = new();
+            List<DataSet> sets = Parser.Parse(lines);
+            foreach (var l in sets[0].Levels)
             {
-            "106PD  G 511.8605  31 1000      E2                                           C  ",
-            "106PD cB E         3050 {I20} (1960Se05), 3050 (1962Am03), 3040 (1966JoZZ)      ",
-            "106PD2 L G=0.290 47                                                             "
-            };
+                foreach (var g in l.Data.GammaRecords)
+                {
+                    foreach (var c in g.Comments)
+                    {
+                        if (c.RType.C2 == 'c')
+                        {
+                            if (c.CTEXT.Contains("E$") || isEnergyComment)
+                            {
+                                if(c.CTEXT.Contains("$") && !c.CTEXT.Contains("E$"))
+                                {
+                                    isEnergyComment = false;
+                                    continue;
+                                }
+                                isEnergyComment = true;
 
-            List<Record> records = Parser.Parse(lines);
-            foreach(var r in records)
-            {
-                Console.WriteLine(r.GetType());
+                                string[] data = c.CTEXT.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                for (int i = 0; i < data.Length; i++)
+                                {
+                                    if (data[i] == "E$") continue;
+                                    if (data[i] == "Other:") break;
+                                    double energy;
+                                    if (double.TryParse(data[i], out energy))
+                                    {
+                                        Value val = new Value() { Val = energy };
+                                        if(i + 1 < data.Length)
+                                        {
+                                            if(data[i + 1].Contains("I"))
+                                            {
+                                                val.DVal = double.Parse(data[i + 1].Replace("{I", "").Replace("}", ""));
+                                                i++;
+                                            }
+                                        }
+                                        if (!values.ContainsKey(l)) values.Add(l, new Dictionary<GammaRecord, List<Value>>());
+                                        if (!values[l].ContainsKey(g)) values[l].Add(g, new List<Value>());
+                                        values[l][g].Add(val);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            GammaRecord g = (GammaRecord)records[0];
-            Console.WriteLine(g.E);
-            Console.WriteLine(g.DE);
-            Console.WriteLine(g.Id.Isotrope);
-            Console.WriteLine(g.Id.Name);
-
-            CommentRecord r1 = (CommentRecord)records[1];
-            Console.WriteLine(r1.CTEXT);
+            foreach(var l in values)
+            {
+                foreach(var g in l.Value)
+                {
+                    Console.WriteLine($"Values for Level:{l.Key.LevelRecord.E} and Gamma:{g.Key.E}");
+                    foreach(var v in g.Value)
+                    {
+                        Console.WriteLine($"{v.Val}±{v.DVal}");
+                    }
+                }
+            }
         }
     }
 }

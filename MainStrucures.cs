@@ -32,30 +32,22 @@ namespace ENSDF_Parser
         {
             Id = id;
             RType = rtype;
+            Comments = new List<CommentRecord>();
         }
 
         public Identifier Id;
         public RecordType RType;
+        public List<CommentRecord> Comments;
     }
 
     class CommentRecord : Record
     {
         public CommentRecord(Identifier id, RecordType rtype, string line) : base(id, rtype)
         {
-            CTEXT = line.Substring(9, 71).Replace(" ", "");
+            CTEXT = line.Substring(9, 71);
         }
 
         public string CTEXT;
-    }
-
-    class ContinuationRecord : Record
-    {
-        public ContinuationRecord(Identifier id, RecordType rtype, string line) : base(id, rtype)
-        {
-            DATA = line.Substring(9, 71).Replace(" ", "");
-        }
-
-        public string DATA;
     }
 
     class IdentificationRecord : Record
@@ -356,5 +348,11 @@ namespace ENSDF_Parser
         }
 
         public string HTEXT;
+    }
+
+    class PN_Pair
+    {
+        public ParentRecord Parent;
+        public NormalizationRecord Normalization;
     }
 }

@@ -26,20 +26,32 @@
                                 }
                                 isEnergyComment = true;
 
-                                string[] data = c.CTEXT.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                if (c.CTEXT.Contains("Other")) isEnergyComment = false;
+                                string[] raw_data = c.CTEXT.Split("Other", StringSplitOptions.RemoveEmptyEntries);
+                                if (raw_data.Length == 1 && isEnergyComment == false) continue;
+                                string[] data = raw_data[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
                                 for (int i = 0; i < data.Length; i++)
-                                {
+                                {                                    
                                     if (data[i] == "E$") continue;
-                                    if (data[i] == "Other:") break;
+                                    if (data[i].Contains(",")) continue;
                                     double energy;
                                     if (double.TryParse(data[i], out energy))
                                     {
-                                        Value val = new Value() { Val = energy };
+                                        Value val = new Value();
+                                        val.SetValue(data[i]);
                                         if(i + 1 < data.Length)
                                         {
-                                            if(data[i + 1].Contains("I"))
+                                            double dVal;
+                                            if (data[i + 1].Contains("I"))
                                             {
                                                 val.DVal = double.Parse(data[i + 1].Replace("{I", "").Replace("}", ""));
+                                                i++;
+                                            }
+                                            else if (double.TryParse(data[i + 1], out dVal))
+                                            {
+                                                Console.WriteLine($"Missing {{I...}} for Level: {l.LevelRecord.E} and Gamma: {g.E}!");
+                                                val.DVal = dVal;
                                                 i++;
                                             }
                                         }
@@ -53,14 +65,16 @@
                     }
                 }
             }
-            foreach(var l in values)
+            foreach (var l in values)
             {
                 foreach(var g in l.Value)
                 {
-                    Console.WriteLine($"Values for Level:{l.Key.LevelRecord.E} and Gamma:{g.Key.E}");
                     foreach(var v in g.Value)
                     {
-                        Console.WriteLine($"{v.Val}±{v.DVal}");
+                        if (v.DVal == 0)
+                        {
+                            Console.WriteLine($"Value with missing uncertainty for Level:{l.Key.LevelRecord.E} and Gamma:{g.Key.E}: {v.Val}±{v.DVal};");
+                        }
                     }
                 }
             }

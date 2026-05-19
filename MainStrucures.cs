@@ -20,10 +20,38 @@ namespace ENSDF_Parser
         public char C4;
     }
 
-    struct Value
+    class Value
     {
-        public double Val;
-        public double DVal;
+        public double Val { get; set; }
+        double units;
+        public double DVal 
+        {
+            get => dVal;
+            set
+            {
+                dVal = value * units;
+                dVal = Math.Round(dVal, (int)Math.Abs(Math.Log10(units)));
+            }
+        }
+        double dVal;
+
+        public void SetValue(string val)
+        {
+            units = LeastSignificantUnit(val);
+            Val = double.Parse(val);
+        }
+
+        static double LeastSignificantUnit(string s)
+        {
+            int dot = s.IndexOf('.');
+
+            if (dot < 0)
+                return 1.0;
+
+            int decimals = s.Length - dot - 1;
+
+            return Math.Pow(10, -decimals);
+        }
     }
 
     class Record

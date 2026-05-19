@@ -23,23 +23,26 @@ namespace ENSDF_Parser
     class Value
     {
         public double Val { get; set; }
+        double units;
         public double DVal 
         {
             get => dVal;
             set
             {
-                dVal = value * LeastSignificantUnit();
-                int round = value.ToString().Length;
-                dVal = Math.Round(dVal, round);
+                dVal = value * units;
+                dVal = Math.Round(dVal, (int)Math.Abs(Math.Log10(units)));
             }
         }
         double dVal;
 
-        double LeastSignificantUnit()
+        public void SetValue(string val)
         {
-            string s = Val.ToString();
-            Console.WriteLine(s);
+            units = LeastSignificantUnit(val);
+            Val = double.Parse(val);
+        }
 
+        static double LeastSignificantUnit(string s)
+        {
             int dot = s.IndexOf('.');
 
             if (dot < 0)

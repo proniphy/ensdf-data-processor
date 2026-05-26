@@ -26,8 +26,8 @@
                                 }
                                 isEnergyComment = true;
 
-                                if (c.CTEXT.Contains("Other:")) isEnergyComment = false;
-                                string[] raw_data = c.CTEXT.Split("Other:", StringSplitOptions.RemoveEmptyEntries);
+                                if (c.CTEXT.Contains("Other")) isEnergyComment = false;
+                                string[] raw_data = c.CTEXT.Split("Other", StringSplitOptions.RemoveEmptyEntries);
                                 if (raw_data.Length == 1 && isEnergyComment == false) continue;
                                 string[] data = raw_data[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -38,7 +38,8 @@
                                     double energy;
                                     if (double.TryParse(data[i], out energy))
                                     {
-                                        Value val = new Value() { Val = energy };
+                                        Value val = new Value();
+                                        val.SetValue(data[i]);
                                         if(i + 1 < data.Length)
                                         {
                                             double dVal;
@@ -49,6 +50,7 @@
                                             }
                                             else if (double.TryParse(data[i + 1], out dVal))
                                             {
+                                                Console.WriteLine($"Missing {{I...}} for Level: {l.LevelRecord.E} and Gamma: {g.E}!");
                                                 val.DVal = dVal;
                                                 i++;
                                             }
@@ -67,10 +69,12 @@
             {
                 foreach(var g in l.Value)
                 {
-                    Console.WriteLine($"Values for Level:{l.Key.LevelRecord.E} and Gamma:{g.Key.E}");
                     foreach(var v in g.Value)
                     {
-                        Console.WriteLine($"{v.Val}±{v.DVal}");
+                        if (v.DVal == 0)
+                        {
+                            Console.WriteLine($"Value with missing uncertainty for Level:{l.Key.LevelRecord.E} and Gamma:{g.Key.E}: {v.Val}±{v.DVal};");
+                        }
                     }
                 }
             }

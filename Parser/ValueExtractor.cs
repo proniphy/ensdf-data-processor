@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AveragingMethods;
+using ENSDF_Parser.MetaData;
+using ENSDF_Parser.Records;
 
 namespace ENSDF_Parser
 {

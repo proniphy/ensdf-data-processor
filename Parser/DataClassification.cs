@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ENSDF_Parser
 {
-    class DataSet
+    public class DataSet
     {
         public DataSet(Identifier id, List<Record> records)
         {
@@ -109,7 +109,7 @@ namespace ENSDF_Parser
                         else UnplacedRecords.DelayedParticleRecords.Add(d);
                         break;
                     case ParentRecord p:
-                        Header.PN_Pairs.Add(new PN_Pair() { Parent = p });
+                        Header.PN_Pairs.Add(new PNPair() { Parent = p });
                         break;
                     case NormalizationRecord n:
                         if (n.RType.C4 == ' ')
@@ -134,21 +134,21 @@ namespace ENSDF_Parser
 
         public Identifier Id;
         public Header Header = new();
-        public Radiation UnplacedRecords = new();
+        public RadiationData UnplacedRecords = new();
         public List<Level> Levels = new();
     }
 
-    class Header
+    public class Header
     {
         public List<IdentificationRecord> IdentificationRecords = new();
         public List<HistoryRecord> HistoryRecords = new();
         public List<CrossReferenceRecord> CrossReferenceRecords = new();
         public List<QValueRecord> QValueRecords = new();
-        public List<PN_Pair> PN_Pairs = new();
+        public List<PNPair> PN_Pairs = new();
         public List<CommentRecord> CommentRecords = new();
     }
 
-    class Radiation
+    public class RadiationData
     {
         public List<GammaRecord> GammaRecords = new();
         public List<BetaRecord> BettaRecords = new();
@@ -157,9 +157,9 @@ namespace ENSDF_Parser
         public List<DelayedParticleRecord> DelayedParticleRecords = new();
     }
 
-    class Level
+    public class Level
     {
         public LevelRecord LevelRecord;
-        public Radiation Data = new();
+        public RadiationData Data = new();
     }
 }

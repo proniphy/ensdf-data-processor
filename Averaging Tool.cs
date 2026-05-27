@@ -14,6 +14,8 @@ namespace AveragingMethods
             Methods.Add(LimitedWeightMean);
             Methods.Add(NormalizedResidualMethod);
             Methods.Add(GaussianConsensusAveraging);
+            Methods.Add(WeightedAverage);
+            Methods.Add(EvaluatedAverage);
         }
 
         List<IAverageMethod> Methods = new List<IAverageMethod>();
@@ -22,6 +24,8 @@ namespace AveragingMethods
         public LimitedWeightMean LimitedWeightMean { get; } = new LimitedWeightMean();
         public NormalizedResidualMethod NormalizedResidualMethod { get; } = new NormalizedResidualMethod();
         public GaussianConsensusAveraging GaussianConsensusAveraging { get; } = new GaussianConsensusAveraging();
+        public WeightedAverage WeightedAverage { get; } = new WeightedAverage();
+        public EvaluatedAverage EvaluatedAverage { get; } = new EvaluatedAverage();
 
         public void Print(List<Value> values)
         {
